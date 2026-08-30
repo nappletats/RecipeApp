@@ -4,9 +4,11 @@ A personal recipe manager: capture recipes from cookbooks and the web, search ev
 
 ## Local development
 
+The app always talks to Turso over HTTP (see "Why the HTTP-only client" below), so local dev needs `.env`'s `DATABASE_URL`/`TURSO_AUTH_TOKEN` pointed at your Turso database — there's no offline local-file mode.
+
 ```bash
 npm install
-npm run db:migrate   # creates local.db and applies schema + FTS5 search index
+npm run db:migrate   # applies schema + FTS5 search index to Turso (safe to re-run)
 npm run dev
 ```
 
@@ -64,6 +66,8 @@ Keep the plaintext password somewhere safe (a password manager) — only the has
 6. Deploy. Render gives you a `https://your-app.onrender.com` URL.
 
 (Uses `@sveltejs/adapter-node`, already configured in `vite.config.ts` — Render has no adapter-auto detection, so this is pinned explicitly.)
+
+**Why the HTTP-only client:** [src/lib/server/db/index.ts](src/lib/server/db/index.ts) uses `@libsql/client/http` instead of the default `@libsql/client`. The default client depends on the `libsql` package's native binding (for local-file/embedded-replica support), which Rollup can't bundle for an adapter-node production build — it does a `require(variableName)` for the platform-specific binary that the bundler can't statically resolve, and the build throws at request time. Since this app only ever connects to a remote Turso database, the HTTP-only client avoids the native dependency entirely.
 
 ### 5. Install on your phone
 
