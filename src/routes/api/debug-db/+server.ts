@@ -7,11 +7,14 @@ import { recipes } from '$lib/server/db/schema';
 // error, since Render's log viewer isn't showing live output. Remove once
 // the production 500 is diagnosed.
 export async function GET() {
+	const token = env.TURSO_AUTH_TOKEN ?? '';
 	const report: Record<string, unknown> = {
 		databaseUrlSet: Boolean(env.DATABASE_URL),
-		databaseUrlPrefix: env.DATABASE_URL?.slice(0, 20) ?? null,
+		databaseUrlFull: env.DATABASE_URL ?? null,
 		authTokenSet: Boolean(env.TURSO_AUTH_TOKEN),
-		authTokenLength: env.TURSO_AUTH_TOKEN?.length ?? 0
+		authTokenLength: token.length,
+		authTokenBase64: Buffer.from(token, 'utf8').toString('base64'),
+		authTokenCharCodesFirst30: Array.from(token.slice(0, 30)).map((c) => c.charCodeAt(0))
 	};
 
 	try {
