@@ -6,13 +6,17 @@
 	let { form }: { form: ActionData } = $props();
 	let scanning = $state(false);
 	let resizing = $state(false);
+	let timedOut = $state(false);
 
 	// Phone camera photos are routinely 10-20MB at full resolution, which
 	// both blows past reasonable upload limits and makes Tesseract painfully
 	// slow (OCR time scales with pixel count, and Render's free tier has
 	// limited CPU). Shrinking client-side before upload fixes both — OCR
 	// doesn't need anywhere near full camera resolution to read page text.
-	const MAX_DIMENSION = 2000;
+	// Real photographed text (paper grain, lighting, slight blur) is far
+	// harder for Tesseract than clean rendered text, so this stays modest.
+	const MAX_DIMENSION = 1500;
+	const SCAN_TIMEOUT_MS = 90_000;
 
 	async function resizeImage(file: File): Promise<File> {
 		try {
@@ -67,15 +71,33 @@
 		method="POST"
 		action="?/scan"
 		enctype="multipart/form-data"
-		use:enhance={() => {
+		use:enhance={({ controller }) => {
 			scanning = true;
+			timedOut = false;
+
+			// use:enhance silently swallows AbortError and never invokes our
+			// callback below when a request is aborted, so the UI state reset
+			// can't live there — it has to happen directly in this timer.
+			const timeoutId = setTimeout(() => {
+				controller.abort();
+				scanning = false;
+				timedOut = true;
+			}, SCAN_TIMEOUT_MS);
+
 			return async ({ update }) => {
+				clearTimeout(timeoutId);
 				await update();
 				scanning = false;
 			};
 		}}
 		class="flex flex-col gap-4 py-4"
 	>
+		{#if timedOut}
+			<p class="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+				That took too long to read (over {SCAN_TIMEOUT_MS / 1000}s) — try a clearer, closer, or
+				better-lit photo of a smaller section of the page.
+			</p>
+		{/if}
 		{#if form?.error}
 			<p class="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{form.error}</p>
 		{/if}

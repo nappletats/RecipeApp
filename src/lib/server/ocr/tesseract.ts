@@ -21,8 +21,14 @@ export async function extractTextFromImage(image: Buffer): Promise<string> {
 		} = await Promise.race([recognize, timeout]);
 		return text.trim();
 	} finally {
-		// Always terminate, whether recognize() finished, threw, or the race
-		// timed out — an orphaned worker would otherwise keep running server-side.
-		await worker.terminate();
+		// Bounded, not awaited-forever: if recognize() was mid-computation
+		// when the race timed out, terminate() on that same stuck worker can
+		// itself hang — which would block this response indefinitely even
+		// though the timeout above "won". Give it a few seconds, then move on
+		// regardless so the HTTP response always actually gets sent.
+		void Promise.race([
+			worker.terminate(),
+			new Promise((resolve) => setTimeout(resolve, 5000))
+		]);
 	}
 }
