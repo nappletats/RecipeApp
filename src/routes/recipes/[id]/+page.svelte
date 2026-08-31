@@ -29,7 +29,7 @@
 		<div class="flex shrink-0 gap-2">
 			<a
 				href="/recipes/{data.recipe.id}/edit"
-				class="rounded-full border border-stone-300 px-3 py-1.5 text-sm font-medium active:bg-stone-100"
+				class="rounded-full border border-stone-300 px-4 py-2.5 text-sm font-medium active:bg-stone-100"
 			>
 				Edit
 			</a>
@@ -121,7 +121,7 @@
 				</label>
 				<button
 					type="submit"
-					class="ml-auto rounded-lg bg-orange-600 px-4 py-2 text-sm font-semibold text-white active:bg-orange-700"
+					class="ml-auto rounded-lg bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white active:bg-orange-700"
 				>
 					Add note
 				</button>

@@ -2,8 +2,17 @@
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import { page } from '$app/state';
+	import { browser } from '$app/environment';
 
 	let { children } = $props();
+
+	if (browser) {
+		import('virtual:pwa-register')
+			.then(({ registerSW }) => registerSW({ immediate: true }))
+			.catch(() => {
+				// no-op in dev, where the service worker isn't built
+			});
+	}
 </script>
 
 <svelte:head><link rel="icon" href={favicon} /></svelte:head>
@@ -15,7 +24,7 @@
 				<a href="/" class="text-lg font-semibold tracking-tight">🍳 Recipes</a>
 				<a
 					href="/recipes/new"
-					class="rounded-full bg-orange-600 px-4 py-2 text-sm font-semibold text-white active:bg-orange-700"
+					class="rounded-full bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white active:bg-orange-700"
 				>
 					+ New
 				</a>

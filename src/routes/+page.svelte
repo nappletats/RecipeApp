@@ -23,8 +23,11 @@
 
 <svelte:head><title>Recipes</title></svelte:head>
 
-<div class="flex flex-col gap-4 py-4">
-	<form method="GET" class="flex gap-2">
+<div class="flex flex-col gap-4">
+	<form
+		method="GET"
+		class="sticky top-14 z-[5] -mx-4 bg-stone-50/95 px-4 py-3 backdrop-blur"
+	>
 		<input
 			name="q"
 			type="search"
