@@ -5,6 +5,57 @@
 
 	let { form }: { form: ActionData } = $props();
 	let scanning = $state(false);
+	let resizing = $state(false);
+
+	// Phone camera photos are routinely 10-20MB at full resolution, which
+	// both blows past reasonable upload limits and makes Tesseract painfully
+	// slow (OCR time scales with pixel count, and Render's free tier has
+	// limited CPU). Shrinking client-side before upload fixes both — OCR
+	// doesn't need anywhere near full camera resolution to read page text.
+	const MAX_DIMENSION = 2000;
+
+	async function resizeImage(file: File): Promise<File> {
+		try {
+			const bitmap = await createImageBitmap(file);
+			let { width, height } = bitmap;
+			if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
+				const scale = MAX_DIMENSION / Math.max(width, height);
+				width = Math.round(width * scale);
+				height = Math.round(height * scale);
+			}
+
+			const canvas = document.createElement('canvas');
+			canvas.width = width;
+			canvas.height = height;
+			const ctx = canvas.getContext('2d');
+			if (!ctx) return file;
+			ctx.drawImage(bitmap, 0, 0, width, height);
+
+			const blob = await new Promise<Blob | null>((resolve) =>
+				canvas.toBlob(resolve, 'image/jpeg', 0.85)
+			);
+			if (!blob) return file;
+
+			return new File([blob], 'photo.jpg', { type: 'image/jpeg' });
+		} catch {
+			// Fall back to the original file — the server still validates size/type.
+			return file;
+		}
+	}
+
+	async function onFileChange(e: Event) {
+		const input = e.currentTarget as HTMLInputElement;
+		const file = input.files?.[0];
+		if (!file) return;
+
+		resizing = true;
+		const resized = await resizeImage(file);
+		resizing = false;
+
+		const dt = new DataTransfer();
+		dt.items.add(resized);
+		input.files = dt.files;
+	}
 </script>
 
 <svelte:head><title>Scan a cookbook page</title></svelte:head>
@@ -37,16 +88,23 @@
 				accept="image/*"
 				capture="environment"
 				required
+				onchange={onFileChange}
 				class="rounded-lg border border-stone-300 px-4 py-3 text-base"
 			/>
 		</label>
 
 		<button
 			type="submit"
-			disabled={scanning}
+			disabled={scanning || resizing}
 			class="rounded-lg bg-orange-600 px-4 py-3 text-base font-semibold text-white active:bg-orange-700 disabled:opacity-60"
 		>
-			{scanning ? 'Reading photo… this can take a moment' : 'Scan photo'}
+			{#if resizing}
+				Preparing photo…
+			{:else if scanning}
+				Reading photo… this can take a moment
+			{:else}
+				Scan photo
+			{/if}
 		</button>
 
 		<div class="flex flex-col items-center gap-1">
