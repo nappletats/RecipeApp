@@ -63,6 +63,7 @@ Keep the plaintext password somewhere safe (a password manager) — only the has
    - `TURSO_AUTH_TOKEN` — your Turso auth token
    - `APP_PASSWORD_HASH_B64` — from step 3
    - `SESSION_SECRET` — from step 3
+   - `BODY_SIZE_LIMIT` — set to `15M`. `@sveltejs/adapter-node` defaults this to **512K**, which is enforced before the app's own code runs — the photo-scan upload needs headroom above that (a resized photo can land in the few-hundred-KB to low-MB range), or every scan fails with a generic 413 regardless of the app's own 10MB check.
 6. Deploy. Render gives you a `https://your-app.onrender.com` URL.
 
 (Uses `@sveltejs/adapter-node`, already configured in `vite.config.ts` — Render has no adapter-auto detection, so this is pinned explicitly.)

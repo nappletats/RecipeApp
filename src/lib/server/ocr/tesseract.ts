@@ -6,7 +6,14 @@ const OCR_TIMEOUT_MS = 60_000;
 // Tesseract can't reliably tell the two apart, so the review step (the
 // recipe form shown after scanning) is where the user does that split.
 export async function extractTextFromImage(image: Buffer): Promise<string> {
-	const worker = await createWorker('eng');
+	// Without an errorHandler, tesseract.js's internal message handler does
+	// `throw Error(data)` synchronously on any worker-side failure (e.g. an
+	// unreadable/corrupt image) — that throw happens outside any promise
+	// chain, so it's an uncaught exception that crashes the entire Node
+	// process, not just this request. The corresponding recognize() promise
+	// rejection (caught below) is what actually carries the error to the
+	// caller; this just needs to exist to suppress the crash-inducing default.
+	const worker = await createWorker('eng', undefined, { errorHandler: () => {} });
 	try {
 		const recognize = worker.recognize(image);
 		const timeout = new Promise<never>((_, reject) => {
