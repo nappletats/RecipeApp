@@ -23,25 +23,25 @@ export const actions: Actions = {
 			return fail(400, { error: "That URL can't be imported", url });
 		}
 
-		let result;
+		let result: Awaited<ReturnType<typeof fetchRecipeFromUrl>> | null = null;
+		let fetchError: string | null = null;
 		try {
 			result = await fetchRecipeFromUrl(parsedUrl.toString());
 		} catch (err) {
-			return fail(502, {
-				error: err instanceof Error ? err.message : 'Could not fetch that page',
-				url
-			});
+			// Some sites (notably ones with aggressive bot protection) refuse
+			// automated fetches outright — that's not recoverable by retrying,
+			// so land in the same prefilled edit form as "no recipe data found"
+			// rather than a dead-end error the user has to click out of.
+			fetchError = err instanceof Error ? err.message : 'Could not fetch that page';
 		}
 
-		if (!result.parsed) {
-			// No Recipe structured data on the page — fall back to a mostly-blank
-			// prefilled form rather than a dead end, per the "always land in the
-			// shared edit form" rule.
+		if (!result?.parsed) {
 			return {
 				imported: true,
 				found: false,
+				fetchError,
 				sourceUrl: url,
-				title: result.pageTitle ?? '',
+				title: result?.pageTitle ?? '',
 				servings: '',
 				prepTimeMinutes: null,
 				cookTimeMinutes: null,

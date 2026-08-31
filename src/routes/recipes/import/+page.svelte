@@ -43,7 +43,12 @@
 		</div>
 	</form>
 {:else}
-	{#if form.found === false}
+	{#if form.fetchError}
+		<p class="mt-4 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800">
+			Couldn't reach that page ({form.fetchError}) — some sites block automated access entirely.
+			Fill in the recipe by hand below.
+		</p>
+	{:else if form.found === false}
 		<p class="mt-4 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800">
 			Couldn't find structured recipe data on that page — double-check and fill in the rest by
 			hand.

@@ -21,9 +21,22 @@ const FETCH_TIMEOUT_MS = 10_000;
 
 export async function fetchRecipeFromUrl(url: string): Promise<FetchRecipeResult> {
 	const res = await fetch(url, {
+		// Some recipe sites (notably Dotdash Meredith properties — AllRecipes,
+		// Serious Eats) run bot detection that blocks non-browser requests
+		// outright, including an honest custom User-Agent. This is a personal,
+		// on-demand fetch of a single page the user explicitly asked to
+		// import, not scraping at scale, so presenting as a normal browser
+		// request is reasonable here.
 		headers: {
 			'User-Agent':
-				'Mozilla/5.0 (compatible; RecipesApp/1.0; +personal recipe manager)'
+				'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36',
+			Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+			'Accept-Language': 'en-US,en;q=0.9',
+			'Sec-Fetch-Dest': 'document',
+			'Sec-Fetch-Mode': 'navigate',
+			'Sec-Fetch-Site': 'none',
+			'Sec-Fetch-User': '?1',
+			'Upgrade-Insecure-Requests': '1'
 		},
 		redirect: 'follow',
 		signal: AbortSignal.timeout(FETCH_TIMEOUT_MS)
