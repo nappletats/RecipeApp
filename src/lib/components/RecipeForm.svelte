@@ -14,6 +14,7 @@
 		formAction?: string;
 		sourceUrl?: string | null;
 		imageUrl?: string | null;
+		rawText?: string | null;
 	}
 
 	let {
@@ -28,7 +29,8 @@
 		error = '',
 		formAction,
 		sourceUrl = null,
-		imageUrl = null
+		imageUrl = null,
+		rawText = null
 	}: Props = $props();
 </script>
 
@@ -39,6 +41,7 @@
 
 	{#if sourceUrl}<input type="hidden" name="sourceUrl" value={sourceUrl} />{/if}
 	{#if imageUrl}<input type="hidden" name="imageUrl" value={imageUrl} />{/if}
+	{#if rawText}<input type="hidden" name="rawText" value={rawText} />{/if}
 
 	<label class="flex flex-col gap-1">
 		<span class="text-sm font-medium text-stone-700">Title</span>

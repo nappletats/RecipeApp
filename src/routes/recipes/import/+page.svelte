@@ -37,7 +37,10 @@
 			Fetch recipe
 		</button>
 
-		<a href="/recipes/new" class="text-center text-sm text-stone-500">Enter manually instead</a>
+		<div class="flex flex-col items-center gap-1">
+			<a href="/recipes/new" class="text-sm text-stone-500">Enter manually instead</a>
+			<a href="/recipes/capture" class="text-sm text-stone-500">Scan a cookbook page instead</a>
+		</div>
 	</form>
 {:else}
 	{#if form.found === false}
