@@ -7,7 +7,10 @@
 
 <svelte:head><title>New recipe</title></svelte:head>
 
-<h1 class="pt-4 text-xl font-semibold">New recipe</h1>
+<div class="flex items-center justify-between pt-4">
+	<h1 class="text-xl font-semibold">New recipe</h1>
+	<a href="/recipes/import" class="text-sm font-medium text-orange-600">Import from URL →</a>
+</div>
 
 <RecipeForm
 	title={form?.title ?? ''}

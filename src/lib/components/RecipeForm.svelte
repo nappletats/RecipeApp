@@ -11,6 +11,9 @@
 		tagsText?: string;
 		submitLabel?: string;
 		error?: string;
+		formAction?: string;
+		sourceUrl?: string | null;
+		imageUrl?: string | null;
 	}
 
 	let {
@@ -22,14 +25,20 @@
 		stepsText = '',
 		tagsText = '',
 		submitLabel = 'Save recipe',
-		error = ''
+		error = '',
+		formAction,
+		sourceUrl = null,
+		imageUrl = null
 	}: Props = $props();
 </script>
 
-<form method="POST" use:enhance class="flex flex-col gap-5 py-4">
+<form method="POST" action={formAction} use:enhance class="flex flex-col gap-5 py-4">
 	{#if error}
 		<p class="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>
 	{/if}
+
+	{#if sourceUrl}<input type="hidden" name="sourceUrl" value={sourceUrl} />{/if}
+	{#if imageUrl}<input type="hidden" name="imageUrl" value={imageUrl} />{/if}
 
 	<label class="flex flex-col gap-1">
 		<span class="text-sm font-medium text-stone-700">Title</span>
